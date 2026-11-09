@@ -4,24 +4,26 @@ require "connection.php";
 
 $id = $_GET['id'] ?? null;
 
-$stmt = $pdo->prepare('SELECT id, title, cover_path, price, summary, language FROM books WHERE id = :id');
-$stmt->execute(['id' => $id]);
-$book = $stmt->fetch();
+$bookStmt = $pdo->prepare('SELECT id, title, cover_path, price, summary, language FROM books WHERE id = :id');
+$bookStmt->execute(['id' => $id]);
+$book = $bookStmt->fetch();
+
+$authorStmt = $pdo->prepare(
+    'SELECT a.first_name, a.last_name
+     FROM book_authors ba
+     JOIN authors a ON ba.author_id = a.id
+     WHERE ba.book_id = :id'
+);
 
 if (!$book) {
     http_response_code(404);
     exit('Book not found.');
 }
 
-$stmt = $pdo->prepare('
-    SELECT authors.first_name, authors.last_name
-    FROM authors
-    JOIN book_authors ON authors.id = book_authors.author_id
-    WHERE book_authors.book_id = :id
-');
 
-$stmt->execute(['id' => $id]);
-$authors = $stmt->fetchAll();
+
+$authorStmt->execute(['id' => $id]);
+$authors = $authorStmt->fetchAll();
 ?>
 
 
