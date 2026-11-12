@@ -2,8 +2,8 @@
 
 require "connection.php";
 
-$authorId = $_POST['author'] ?? null;
-$bookId = $_POST['id'] ?? null;
+$authorId = $_POST['author-id'] ?? null;
+$bookId = $_POST['book-id'] ?? null;
 
 $stmt = $pdo->prepare('
     INSERT INTO book_authors (book_id, author_id)

@@ -9,9 +9,9 @@ $stmt->execute(['id' => $id]);
 $book = $stmt->fetch();
 
 $stmt = $pdo->prepare(
-   'SELECT authors.id, authors.first_name, authors.last_name 
-    FROM authors 
-    JOIN book_authors ON authors.id = book_authors.author_id 
+   'SELECT authors.id, authors.first_name, authors.last_name
+    FROM authors
+    JOIN book_authors ON authors.id = book_authors.author_id
     WHERE book_authors.book_id = :id
 ');
 
@@ -19,13 +19,16 @@ $stmt->execute(['id' => $id]);
 $bookAuthors = $stmt->fetchAll();
 
 $authorStmt = $pdo->prepare(
-    'SELECT a.first_name, a.last_name
-     FROM book_authors ba
-     JOIN authors a ON ba.author_id = a.id
-     WHERE ba.book_id = :id'
-);
+   'SELECT ba.id AS book_author_id, a.first_name, a.last_name
+    FROM book_authors ba
+    JOIN authors a ON ba.author_id = a.id
+    WHERE ba.book_id = :id
+');
 $authorStmt->execute(['id' => $id]);
 $authors = $authorStmt->fetchAll();
+
+$allAuthorsStmt = $pdo->prepare('SELECT * FROM authors a WHERE a.id NOT IN (SELECT ba.author_id FROM book_authors ba WHERE ba.book_id = :book_id);');
+$allAuthorsStmt->execute(['book_id' => $id]);
 ?>
 
 
@@ -61,25 +64,29 @@ $authors = $authorStmt->fetchAll();
     </body>
 </html>
 
-  <h2>Authors:</h2>
-    <h3>Add author:</h3>
-        <a for="authors">All authors:</a>
-        <form method="post" action="add_author.php">
-          <input type="hidden" name="book-authors-id" value="<?= $book['id'] ?>">
-        <li>
-            <?php foreach ($authors as $author) { ?>
-                <input type="hidden" name="id" value="<?= $book['id'] ?>">
-                <?=$author['first_name'] . ' ' . $author['last_name'] ?>
-            <?php } ?>
-        </li>
-        <button type="submit">Add</button>
-    </form>
+<h3>Add author:</h3>
+    <form action="add_author.php" method="post">
+        <input type="hidden" name="book-id" value="<?= $id; ?>">
+        <select name="author-id">
+            <option selected="true" disabled="disabled"></option>
+
+        <?php while ( $author = $allAuthorsStmt->fetch() ) { ?>
+
+            <option value="<?= $author['id']; ?>"><?= $author['first_name']; ?> <?= $author['last_name']; ?></option>
+
+        <?php } ?>
+
+    </select>
+    <br>
+    <button type="submit">Salvesta</button>
+</form>
       <h3>Remove author:</h3>
 
     <?php foreach ($authors as $author) { ?>
     <form method="post" action="delete_author.php">
         <li>
-            <input type="hidden" name="id" value="<?= $book['id'] ?>">
+            <input type="hidden" name="id" value="<?= $id ?>">
+            <input type="hidden" name="book-author-id" value="<?= $author['book_author_id'] ?>">
             <?=$author['first_name'] . ' ' . $author['last_name'] ?>
             <button type="submit">Remove</button>
         </li>
