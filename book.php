@@ -4,7 +4,9 @@ require "connection.php";
 
 $id = $_GET['id'] ?? null;
 
-$bookStmt = $pdo->prepare('SELECT id, title, cover_path, price, summary, language FROM books WHERE id = :id');
+$isDeleted = $_GET['delete'] ?? null;
+
+$bookStmt = $pdo->prepare('SELECT id, title, release_date, cover_path, language, summary, price, stock_saldo, pages, type FROM books WHERE id = :id');
 $bookStmt->execute(['id' => $id]);
 $book = $bookStmt->fetch();
 
@@ -51,6 +53,5 @@ $authors = $authorStmt->fetchAll();
         <p><?= $book['language'] ?></p>
         <p><?= round($book['price'], 2)."€" ?></p>
         <a href="change.php?id=<?= $book['id'] ?>">Change</a>
-        <button>Delete</button>
     </body>
 </html>

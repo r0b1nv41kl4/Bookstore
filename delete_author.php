@@ -10,16 +10,3 @@ $stmt = $pdo->prepare('DELETE FROM book_authors WHERE id = :id');
 $stmt->execute(['id' => $bookAuthorId]);
 
 header("Location: book.php?id=$bookId&delete=success");
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -4,7 +4,7 @@ require "connection.php";
 
 $id = $_GET['id'] ?? null;
 
-$stmt = $pdo->prepare('SELECT id, title, release_date, cover_path, price, summary, language, pages, stock_saldo, type FROM books WHERE id = :id');
+$stmt = $pdo->prepare('SELECT id, title, release_date, cover_path, price, summary, language, pages, stock_saldo, type FROM books WHERE id = :id AND is_deleted = 0');
 $stmt->execute(['id' => $id]);
 $book = $stmt->fetch();
 
@@ -92,3 +92,7 @@ $allAuthorsStmt->execute(['book_id' => $id]);
         </li>
     </form>
 <?php } ?>
+    <form method="post" action="delete_book.php">
+        <input type="hidden" name="id" value="<?= $id ?>">
+        <button type="submit" value="Submit">Delete book</button>
+    </form>
